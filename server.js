@@ -1,20 +1,38 @@
 /*jshint esversion: 6 */
 
 const net = require('net');
-const server = net.createServer((c) => {
 
-  console.log('client connected');
-  c.on('close', () => {
-    console.log('client disconnected');
+var users = [];
+
+const server = net.createServer((socket) => {
+
+  users.push(socket);
+
+  socket.on('data', (chunk) => {
+    broadcast(socket.name + "> " + chunk, socket);
   });
-  c.on('data', (chunk) => {
-    console.log(chunk);
+  socket.on('error', () => {
+    users.splice(users.indexOf(socket), 1);
+    broadcast(socket.name + " left the chat.");
   });
-  /*c.write('hello\r\n');
-  c.pipe(c);*/
+
 });
 
 server.listen(6969, '0.0.0.0', () => {
   console.log('server bound');
 
 });
+
+
+function broadcast(message, sender){
+  users.forEach(function(user){
+
+    if(user === sender){
+      return;
+      }else{
+      users.write(message);
+      }
+    });
+
+    process.stdout.write(message);
+  }
